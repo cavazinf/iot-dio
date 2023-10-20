@@ -1,0 +1,27 @@
+import tensorflow as tf
+from tensorflow import keras
+import numpy as np
+import cv2
+
+# Carregue o modelo treinado
+model = keras.models.load_model('modelo.h5')
+
+# Carregue as classes do seu conjunto de dados
+class_names = ['classe1', 'classe2', 'classe3']  # Personalize com suas classes
+
+# Carregue uma imagem para fazer previsões
+image_path = 'caminho/para/sua/imagem.jpg'
+image = cv2.imread(image_path)
+image = cv2.resize(image, (224, 224))  # Redimensione para o tamanho de entrada do modelo
+
+# Pré-processamento da imagem
+image = image / 255.0  # Normalização
+
+# Faça a previsão
+predictions = model.predict(np.expand_dims(image, axis=0))
+predicted_class = np.argmax(predictions)
+
+# Obtenha a classe prevista
+class_name = class_names[predicted_class]
+
+print(f'Classe prevista: {class_name}')
