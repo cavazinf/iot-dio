@@ -1,0 +1,63 @@
+#include <DHT.h> // Biblioteca para o sensor DHT
+#include <WiFi.h> // Biblioteca para o módulo Wi-Fi (ESP8266 ou ESP32)
+
+// Configuração do sensor DHT
+#define DHTPIN 2 // Pino onde o sensor DHT está conectado
+#define DHTTYPE DHT22 // Tipo de sensor (DHT11, DHT22, etc.)
+
+DHT dht(DHTPIN, DHTTYPE);
+
+// Configuração da rede Wi-Fi
+const char* ssid = "NomeDaSuaRedeWiFi";
+const char* password = "SenhaDaSuaRedeWiFi";
+
+// Configuração do LED, Buzina e Motor
+const int ledPin = 12; // Pino do LED
+const int buzzerPin = 11; // Pino da buzina
+const int motorPin = 10; // Pino do motor (via relé)
+
+// Limite de temperatura da estufa
+const float limiteTemperatura = 25.0; // Ajuste para o valor desejado
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+
+  // Inicialização do Wi-Fi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Conectando ao Wi-Fi...");
+  }
+  Serial.println("Conectado ao Wi-Fi");
+
+  pinMode(ledPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(motorPin, OUTPUT);
+  digitalWrite(ledPin, LOW); // Desligar o LED
+  digitalWrite(buzzerPin, LOW); // Desligar a buzina
+  digitalWrite(motorPin, LOW); // Desligar o motor
+}
+
+void loop() {
+  float temperatura = dht.readTemperature(); // Ler a temperatura do sensor
+
+  if (!isnan(temperatura)) {
+    Serial.print("Temperatura: ");
+    Serial.println(temperatura);
+
+    if (temperatura > limiteTemperatura) {
+      // A temperatura ultrapassou o limite, acionar o LED, a buzina e o motor
+      digitalWrite(ledPin, HIGH); // Acender o LED
+      digitalWrite(buzzerPin, HIGH); // Ativar a buzina
+      digitalWrite(motorPin, HIGH); // Ligar o motor (ventilação)
+    } else {
+      // A temperatura está dentro do limite, desligar o LED, a buzina e o motor
+      digitalWrite(ledPin, LOW); // Desligar o LED
+      digitalWrite(buzzerPin, LOW); // Desativar a buzina
+      digitalWrite(motorPin, LOW); // Desligar o motor
+    }
+  }
+
+  delay(2000); // Intervalo entre leituras
+}
