@@ -1,0 +1,49 @@
+import speech_recognition as sr
+import RPi.GPIO as GPIO  # Exemplo para Raspberry Pi
+
+# Configuração dos pinos da lâmpada no Raspberry Pi
+lamp_pin = 17  # Substitua pelo pino correto
+
+# Configuração do reconhecimento de fala
+r = sr.Recognizer()
+
+# Função para ligar a lâmpada
+def ligar_lampada():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(lamp_pin, GPIO.OUT)
+    GPIO.output(lamp_pin, GPIO.HIGH)
+    GPIO.cleanup()
+
+# Função para desligar a lâmpada
+def desligar_lampada():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(lamp_pin, GPIO.OUT)
+    GPIO.output(lamp_pin, GPIO.LOW)
+    GPIO.cleanup()
+
+# Função para ouvir comandos de voz
+def ouvir_comandos():
+    with sr.Microphone() as source:
+        print("Diga um comando:")
+        audio = r.listen(source)
+    
+    try:
+        comando = r.recognize_google(audio, language="pt-BR")
+        print(f"Comando reconhecido: {comando}")
+        if "ligar" in comando:
+            ligar_lampada()
+            print("Lâmpada ligada.")
+        elif "desligar" in comando:
+            desligar_lampada()
+            print("Lâmpada desligada.")
+        else:
+            print("Comando não reconhecido.")
+    
+    except sr.UnknownValueError:
+        print("Não foi possível entender o áudio.")
+    except sr.RequestError as e:
+        print(f"Erro na solicitação: {e}")
+
+# Loop para ouvir comandos continuamente
+while True:
+    ouvir_comandos()
